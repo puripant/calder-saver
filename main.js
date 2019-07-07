@@ -1,83 +1,95 @@
+const mobile_radius = 500;
+
 function fitElementToParent(el, padding) {
-  var timeout = null;
+  let timeout = null;
   function resize() {
     if (timeout) clearTimeout(timeout);
     anime.set(el, {scale: 1});
-    var pad = padding || 0;
-    var parentEl = el.parentNode;
-    var elOffsetWidth = el.offsetWidth - pad;
-    var parentOffsetWidth = parentEl.offsetWidth;
-    var ratio = parentOffsetWidth / elOffsetWidth;
+    let pad = padding || 0;
+    let parentEl = el.parentNode;
+    let elOffsetWidth = el.offsetWidth - pad;
+    let parentOffsetWidth = parentEl.offsetWidth;
+    let ratio = parentOffsetWidth / elOffsetWidth;
     timeout = setTimeout(anime.set(el, {scale: ratio}), 10);
   }
   resize();
   window.addEventListener('resize', resize);
 }
 
-var layeredAnimation = (function() {
-
-  var transformEls = document.querySelectorAll('.transform-progress');
-  var layeredAnimationEl = document.querySelector('.layered-animations');
-  var shapeEls = layeredAnimationEl.querySelectorAll('.shape');
-  var triangleEl = layeredAnimationEl.querySelector('polygon');
-  var trianglePoints = triangleEl.getAttribute('points').split(' ');
-  var easings = ['easeInOutQuad', 'easeInOutCirc', 'easeInOutSine', 'spring'];
+let layeredAnimation = (function() {
+  let transformEls = document.querySelectorAll('.transform-progress');
+  let layeredAnimationEl = document.querySelector('.layered-animations');
+  let shapeEls = layeredAnimationEl.querySelectorAll('.shape');
+  let triangleEl = layeredAnimationEl.querySelector('polygon');
+  let trianglePoints = triangleEl.getAttribute('points').split(' ');
+  let easings = ['easeInOutQuad', 'easeInOutCirc', 'easeInOutSine', 'spring'];
 
   fitElementToParent(layeredAnimationEl);
 
   function createKeyframes(value) {
-    var keyframes = [];
-    for (var i = 0; i < 30; i++) keyframes.push({ value: value });
+    let keyframes = [];
+    for (let i = 0; i < 30; i++) keyframes.push({ value: value });
+    return keyframes;
+  }
+  function interpolateKeyframes(value) {
+    let keyframes = [];
+    for (let i = 0; i < 30; i++) keyframes.push({ value: value * i / 30 });
     return keyframes;
   }
 
   function animateShape(el) {
+    let circleEl = el.querySelector('circle');
+    let rectEl = el.querySelector('rect');
+    let polyEl = el.querySelector('polygon');
 
-    var circleEl = el.querySelector('circle');
-    var rectEl = el.querySelector('rect');
-    var polyEl = el.querySelector('polygon');
+    let mobileKeyframes = interpolateKeyframes(anime.random(-mobile_radius, mobile_radius));
 
-    var animation = anime.timeline({
+    let animation = anime.timeline({
       targets: el,
-      duration: function() { return anime.random(600, 2200); },
-      easing: function() { return easings[anime.random(0, easings.length - 1)]; },
-      complete: function(anim) { animateShape(anim.animatables[0].target); },
+      duration: () => anime.random(1000, 2000),
+      easing: () => easings[anime.random(0, easings.length - 1)],
+      complete: (anim) => animateShape(anim.animatables[0].target),
+      // loop: true,
     })
     .add({
-      translateX: createKeyframes(function(el) { 
-        return el.classList.contains('large') ? anime.random(-300, 300) : anime.random(-520, 520);
-      }),
-      translateY: createKeyframes(function(el) { 
-        return el.classList.contains('large') ? anime.random(-110, 110) : anime.random(-280, 280);
-      }),
-      rotate: createKeyframes(function() { return anime.random(-180, 180); }),
+      translateX: mobileKeyframes,
+      // translateX: createKeyframes(el => 
+      //   el.classList.contains('large') ? anime.random(-300, 300) : anime.random(-520, 520)),
+      // translateY: createKeyframes(el => 
+      //   el.classList.contains('large') ? anime.random(-110, 110) : anime.random(-280, 280)),
+      rotateY: createKeyframes(() => anime.random(-180, 180)),
     }, 0);
-    if (circleEl) {
-      animation.add({
-        targets: circleEl,
-        r: createKeyframes(function() { return anime.random(32, 72); }),
-      }, 0);
-    }
-    if (rectEl) {
-      animation.add({
-        targets: rectEl,
-        width: createKeyframes(function() { return anime.random(64, 120); }),
-        height: createKeyframes(function() { return anime.random(64, 120); }),
-      }, 0);
-    }
+
+    // if (circleEl) {
+    //   animation.add({
+    //     targets: circleEl,
+    //     r: createKeyframes(() => anime.random(32, 72)),
+    //   }, 0);
+    // }
+
+    // if (rectEl) {
+    //   animation.add({
+    //     targets: rectEl,
+    //     width: createKeyframes(() => anime.random(64, 120)),
+    //     height: createKeyframes(() => anime.random(64, 120)),
+    //   }, 0);
+    // }
+
     if (polyEl) {
       animation.add({
         targets: polyEl,
-        points: createKeyframes(function() { 
-          var scale = anime.random(72, 180) / 100;
-          return trianglePoints.map(function(p) { return p * scale; }).join(' ');
-        }),
+        points: mobileKeyframes.map(k => 
+          trianglePoints.map(p => p * Math.sqrt(mobile_radius*mobile_radius - k.value*k.value) / mobile_radius).join(' ')),
+        // points: createKeyframes(() => {
+        //   let scale = anime.random(72, 180) / 100;
+        //   return trianglePoints.map(p => p * scale).join(' ');
+        // }),
       }, 0);
     }
 
   }
 
-  for (var i = 0; i < shapeEls.length; i++) {
+  for (let i = 0; i < shapeEls.length; i++) {
     animateShape(shapeEls[i]);
   }
 
