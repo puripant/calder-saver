@@ -17,7 +17,7 @@ function fitElementToParent(el, padding) {
 }
 
 let layeredAnimation = (function() {
-  let transformEls = document.querySelectorAll('.transform-progress');
+  // let transformEls = document.querySelectorAll('.transform-progress');
   let layeredAnimationEl = document.querySelector('.layered-animations');
   let shapeEls = layeredAnimationEl.querySelectorAll('.shape');
   let triangleEl = layeredAnimationEl.querySelector('polygon');
@@ -38,8 +38,8 @@ let layeredAnimation = (function() {
   }
 
   function animateShape(el) {
-    let circleEl = el.querySelector('circle');
-    let rectEl = el.querySelector('rect');
+    // let circleEl = el.querySelector('circle');
+    // let rectEl = el.querySelector('rect');
     let polyEl = el.querySelector('polygon');
 
     let mobileKeyframes = interpolateKeyframes(anime.random(-mobile_radius, mobile_radius));
