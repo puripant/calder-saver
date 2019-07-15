@@ -54,9 +54,3 @@ strong {
 .color-lavender, .color-svg { color: #8453E3; }/* lavender: */
 .color-purple, .color-easings { color: #C26EFF; }/* purple: */
 .color-pink, .color-helpers { color: #FB89FB; }/* pink: */
-
-.anime-mini-logo {
-  width: 100px;
-  height: 24px;
-  transform: scaleY(.5);
-}
